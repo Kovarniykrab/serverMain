@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"gitlab.com/kovarniykrab/servermain/database"
+	"gitlab.com/kovarniykrab/servermain/domain"
+
 	"github.com/gorilla/mux"
 )
 
@@ -12,8 +15,8 @@ type userHandler struct {
 	domain *domain.Model
 }
 
-func (h *userHandler) GetAllUsersHandler(res http.ResponseWriter, req http.Request) {
-	users, err := h.database.GetAllUsers()
+func (h *userHandler) GetAllUsersHandler(res http.ResponseWriter, req *http.Request) {
+	users, err := database.GetAllUsers()
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
@@ -22,7 +25,7 @@ func (h *userHandler) GetAllUsersHandler(res http.ResponseWriter, req http.Reque
 	json.NewEncoder(res).Encode(users)
 }
 
-func (h *userHandler) GetUser(res http.ResponseWriter, req http.Request) {
+func (h *userHandler) GetUser(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
@@ -39,7 +42,7 @@ func (h *userHandler) GetUser(res http.ResponseWriter, req http.Request) {
 	json.NewEncoder(res).Encode(user)
 }
 
-func (h *userHandler) CreateUser(res http.ResponseWriter, req http.Request) {
+func (h *userHandler) CreateUser(res http.ResponseWriter, req *http.Request) {
 	var user domain.Model
 
 	err := json.NewDecoder(req.Body).Decode(&user)
@@ -58,7 +61,7 @@ func (h *userHandler) CreateUser(res http.ResponseWriter, req http.Request) {
 	json.NewEncoder(res).Encode(userCreated)
 }
 
-func (h *userHandler) UpdateUser(res http.ResponseWriter, req http.Request) {
+func (h *userHandler) UpdateUser(res http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	id, err := strconv.Atoi(vars["id"])
 	if err != nil {
