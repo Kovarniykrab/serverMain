@@ -8,44 +8,45 @@ import (
 	_ "github.com/lib/pq" // Драйвер PostgreSQL
 )
 
-var db *sql.DB
-
-const dbFile = "tableOne"
-
-// InitDB инициализирует подключение
-func InitDB() (*sql.DB, error) {
-
-	var err error
-
-	db, err = sql.Open("postgress", dbFile)
-	if err != nil {
-		return nil, fmt.Errorf("error oper database: %v", err)
-	}
-
-	if err := createTable(db); err != nil {
-		return nil, fmt.Errorf("failed to create table %v", err)
-	}
-
-	err = db.Ping()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fmt.Println("Connection to database is sucefull")
-	return db, nil
+type database struct {
+	*sql.DB
 }
 
-func CloseDB() {
-	db.Close()
+var dbInstance *database
+
+// InitDB инициализирует подключение
+func InitDB() (Database, error) {
+	connStr := "user=youruser dbname=tableOne password=yourpass sslmode=disable"
+	sqlDB, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return nil, fmt.Errorf("error opening database: %v", err)
+	}
+
+	if err := sqlDB.Ping(); err != nil {
+		return nil, fmt.Errorf("error connecting to database: %v", err)
+	}
+
+	if err := createTable(sqlDB); err != nil {
+		return nil, fmt.Errorf("error creating table: %v", err)
+	}
+
+	dbInstance = &database{sqlDB}
+	log.Println("Database connection established")
+	return dbInstance, nil
+}
+
+func (db *database) CloseDB() error {
+	return db.DB.Close()
 }
 
 func createTable(db *sql.DB) error {
 	query := `
-	CREATE TABLE IF NOT EXISTS tableOne()
-	   id INTEGER PRIMARY KEY AUTOINCREMENT
-	   userName TEXT NOT NULL
-	   email TEXT NOT NULL
-	   created_at TEXT NOT NULL);`
+CREATE TABLE IF NOT EXISTS tableOne (
+    id SERIAL PRIMARY KEY,
+    userName TEXT NOT NULL,
+    email TEXT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+)`
 
 	_, err := db.Exec(query)
 	return err

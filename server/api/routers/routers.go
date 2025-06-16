@@ -1,18 +1,23 @@
-package routes
+package routers
 
 import (
 	"github.com/gorilla/mux"
+
+	"gitlab.com/kovarniykrab/servermain/server/api/handlers"
+	"gitlab.com/kovarniykrab/servermain/server/database"
 )
 
-func SetupRoutes(repo *services.TodoService) *mux.Router {
+func SetupRoutes(db database.Database) *mux.Router {
 	router := mux.NewRouter()
-	todoHandler := handlers.NewTodoHandler(repo)
+	userHandler := &handlers.UserHandler{}
 
-	router.HandleFunc("/todos", todoHandler.GetAllTodos).Methods("GET")
-	router.HandleFunc("/todos/{id}", todoHandler.GetTodo).Methods("GET")
-	router.HandleFunc("/todos", todoHandler.CreateTodo).Methods("POST")
-	router.HandleFunc("/todos/{id}", todoHandler.UpdateTodo).Methods("PUT")
-	router.HandleFunc("/todos/{id}", todoHandler.DeleteTodo).Methods("DELETE")
+	// Инициализация обработчиков
 
+	// Маршруты для работы с пользователями
+	router.HandleFunc("/users", userHandler.GetAllUsersHandler).Methods("GET")
+	router.HandleFunc("/users/{id}", userHandler.GetUser).Methods("GET")
+	router.HandleFunc("/users", userHandler.CreateUser).Methods("POST")
+	router.HandleFunc("/users/{id}", userHandler.UpdateUser).Methods("PUT")
+	router.HandleFunc("/users/{id}", userHandler.DeleteUser).Methods("DELETE")
 	return router
 }
