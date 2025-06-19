@@ -4,27 +4,26 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"net/http"
-	"os"
-	"runtime"
-	"strconv"
-	"time"
-
-	"server/config"
-
 	"github.com/gorilla/mux"
 	"github.com/jessevdk/go-flags"
 	"github.com/jmoiron/sqlx"
 	goose "github.com/pressly/goose/v3"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-
 	"github.com/rs/zerolog"
-	routers "gitlab.com/kovarniykrab/servermain/server/api/router"
+	"gitlab.com/kovarniykrab/servermain/config"
+	routers "gitlab.com/kovarniykrab/servermain/internel/api/router"
+	"gitlab.com/kovarniykrab/servermain/internel/database"
+	"net/http"
+	"os"
+	"runtime"
+	"strconv"
+	"time"
 )
 
 func main() {
-	cnf, srv, app, log := initServer()
 	ctx := context.Background()
+
+	cnf, srv, app, log := initServer(ctx)
 
 	go func() {
 		rt := mux.NewRouter()
@@ -62,31 +61,9 @@ func main() {
 		}
 	}()
 
-	go func() {
-		app.Service.WithSyncFuncs(
-			app.Service.SyncNomenclature,            // moved
-			app.Service.SyncPayments,                // moved to s3
-			app.Service.SyncOrder,                   // moved to s3
-			app.Service.SyncColors,                  // moved to s3
-			app.Service.SyncClients,                 // moved
-			app.Service.SyncBooking,                 // moved to s3
-			app.Service.SyncStatusOrderInProduction, // moved to s3
-			app.Service.SyncStatusOrderInStock,      // moved to s3
-			app.Service.SyncStatusOrderInWork,       // moved to s3
-			app.Service.SyncStatusOrderInShipped,    // moved to s3
-			app.Service.SyncCompany,                 // moved to s3
-			app.Service.SyncUserLinkCompany,
-		)
-
-		log.Warn().Msg("sync func served")
-
-		// app.Service.RunSyncLocal(ctx, app.Config.FilesTTL)
-		app.Service.RunSync(ctx, app.Config.FilesTTL)
-	}()
-
 	log.Warn().Str("host", app.Config.Web.Host).
 		Int("port", app.Config.Web.Port).
-		Msg("server start")
+		Msg("internel start")
 
 	c := make(chan os.Signal, 1)
 
@@ -100,7 +77,7 @@ func main() {
 		panic(err)
 	}
 
-	log.Info().Msg("server stop")
+	log.Info().Msg("service stop")
 
 	cancel()
 
@@ -115,7 +92,7 @@ func initLogger(conf config.Config) zerolog.Logger {
 	return log
 }
 
-func initServer() (config.Config, *http.Server, *routers.App, *zerolog.Logger) {
+func initServer(ctx context.Context) (config.Config, *http.Server, *routers.App, *zerolog.Logger) {
 	conf := config.Config{}
 
 	parser := flags.NewParser(&conf, flags.Default)
@@ -126,21 +103,20 @@ func initServer() (config.Config, *http.Server, *routers.App, *zerolog.Logger) {
 
 	log := initLogger(conf)
 
-	repo, db, e := store.New(conf, &log)
+	repo, db, e := database.New(conf, &log)
 	if e != nil {
 		panic(e)
 	}
 
-	app := routers.New(conf, &log, service.TypeAuth, repo)
+	app, err := routers.New(ctx, &conf, &log, repo)
+	if err != nil {
+		panic(e)
+	}
 
 	migrate(db)
 
-	go func() {
-		app.Service.SendMail()
-	}()
-
 	srv := &http.Server{
-		Handler:           app.GetRoutes(),
+		Handler:           app.GetRouter(),
 		Addr:              app.Config.Web.Host + ":" + strconv.Itoa(app.Config.Web.Port),
 		ReadTimeout:       time.Second * time.Duration(app.Config.Web.ReadTimeout),
 		WriteTimeout:      time.Second * time.Duration(app.Config.Web.WriteTimeout),
