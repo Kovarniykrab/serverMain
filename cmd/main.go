@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/jessevdk/go-flags"
-	"github.com/jmoiron/sqlx"
-	goose "github.com/pressly/goose/v3"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rs/zerolog"
 	"gitlab.com/kovarniykrab/servermain/config"
@@ -100,10 +98,9 @@ func initServer(ctx context.Context) (config.Config, *http.Server, *routers.App,
 		fmt.Printf("error parse env: %s\n", err.Error())
 		os.Exit(1)
 	}
-
 	log := initLogger(conf)
 
-	repo, db, e := database.New(conf, &log)
+	repo, _, e := database.New(conf, &log)
 	if e != nil {
 		panic(e)
 	}
@@ -113,7 +110,7 @@ func initServer(ctx context.Context) (config.Config, *http.Server, *routers.App,
 		panic(e)
 	}
 
-	migrate(db)
+	//migrate(db)
 
 	srv := &http.Server{
 		Handler:           app.GetRouter(),
@@ -129,16 +126,16 @@ func initServer(ctx context.Context) (config.Config, *http.Server, *routers.App,
 
 var embedMigrations embed.FS
 
-func migrate(db *sqlx.DB) {
-	s := embedMigrations
-
-	goose.SetBaseFS(s)
-
-	if err := goose.SetDialect("postgres"); err != nil {
-		panic(err)
-	}
-
-	if err := goose.Up(db.DB, "resources/store/psql/migrations"); err != nil {
-		panic(err)
-	}
-}
+//func migrate(db *sqlx.DB) {
+//	s := embedMigrations
+//
+//	goose.SetBaseFS(s)
+//
+//	if err := goose.SetDialect("postgres"); err != nil {
+//		panic(err)
+//	}
+//
+//	if err := goose.Up(db.DB, "resources/store/psql/migrations"); err != nil {
+//		panic(err)
+//	}
+//}

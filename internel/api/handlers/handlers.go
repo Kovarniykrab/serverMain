@@ -49,7 +49,7 @@ func GetUser(app *App) http.HandlerFunc {
 
 func CreateUser(app *App) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
-		var user domain.Model
+		var user domain.User
 
 		err := json.NewDecoder(req.Body).Decode(&user)
 		if err != nil {
@@ -57,7 +57,7 @@ func CreateUser(app *App) http.HandlerFunc {
 			return
 		}
 
-		userCreated, err := app.service.Database.CreateUser(user)
+		userCreated, err := app.service.CreateUser(req.Context(), user)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -77,14 +77,14 @@ func UpdateUser(app *App) http.HandlerFunc {
 			return
 		}
 
-		var user domain.Model
+		var user domain.UserForm
 		err = json.NewDecoder(req.Body).Decode(&user)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		updateUser, err := app.service.Database.UpdateUser(id, user)
+		updateUser, err := app.service.UpdateUser(req.Context(), id, user)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -95,22 +95,23 @@ func UpdateUser(app *App) http.HandlerFunc {
 	}
 }
 
-func DeleteUser(app *App) http.HandlerFunc {
-	return func(w http.ResponseWriter, req *http.Request) {
-		vars := mux.Vars(req)
-		id, err := strconv.Atoi(vars["id"])
-		if err != nil {
-			http.Error(w, "Invalid ID", http.StatusBadRequest)
-			return
-		}
-
-		err = app.service.(id)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		w.WriteHeader(http.StatusNoContent)
-	}
-
-}
+//
+//func DeleteUser(app *App) http.HandlerFunc {
+//	return func(w http.ResponseWriter, req *http.Request) {
+//		vars := mux.Vars(req)
+//		id, err := strconv.Atoi(vars["id"])
+//		if err != nil {
+//			http.Error(w, "Invalid ID", http.StatusBadRequest)
+//			return
+//		}
+//
+//		err = app.service.(id)
+//		if err != nil {
+//			http.Error(w, err.Error(), http.StatusBadRequest)
+//			return
+//		}
+//
+//		w.WriteHeader(http.StatusNoContent)
+//	}
+//
+//}
