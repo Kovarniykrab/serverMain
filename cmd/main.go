@@ -4,18 +4,20 @@ import (
 	"context"
 	"embed"
 	"fmt"
-	"github.com/gorilla/mux"
-	"github.com/jessevdk/go-flags"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/rs/zerolog"
-	"gitlab.com/kovarniykrab/servermain/config"
-	routers "gitlab.com/kovarniykrab/servermain/internel/api/router"
-	"gitlab.com/kovarniykrab/servermain/internel/database"
 	"net/http"
 	"os"
 	"runtime"
 	"strconv"
 	"time"
+
+	"github.com/gorilla/mux"
+	"github.com/jessevdk/go-flags"
+	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/rs/zerolog"
+	"gitlab.com/kovarniykrab/servermain/config"
+	routers "gitlab.com/kovarniykrab/servermain/internel/api/router"
+	"gitlab.com/kovarniykrab/servermain/internel/database"
 )
 
 func main() {
@@ -91,8 +93,13 @@ func initLogger(conf config.Config) zerolog.Logger {
 }
 
 func initServer(ctx context.Context) (config.Config, *http.Server, *routers.App, *zerolog.Logger) {
-	conf := config.Config{}
 
+	err := godotenv.Load("../.env")
+	if err != nil {
+		fmt.Printf("Warning: .env file not found or couldn't be loaded: %v\n", err)
+	}
+
+	conf := config.Config{}
 	parser := flags.NewParser(&conf, flags.Default)
 	if _, err := parser.Parse(); err != nil {
 		fmt.Printf("error parse env: %s\n", err.Error())
