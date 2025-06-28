@@ -6,6 +6,7 @@ services:
 
 stages:
   - build
+  - deploy
 
 build:
   stage: build
@@ -17,3 +18,23 @@ build:
   only:
     - main
     - develop
+
+    deploy:
+  stage: deploy
+  before_script:
+    - apk add --no-cache openssh-client  # Ставим SSH
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+  script:
+    - scp docker-compose.yml $SSH_USER@$SERVER_IP:/app/  # Копируем compose-файл
+    - ssh $SSH_USER@$SERVER_IP "
+        docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY &&
+        docker-compose pull app &&  # Обновляем только app (остальное не трогаем)
+        docker-compose down &&      # Останавливаем старые контейнеры
+        docker-compose up -d        # Запускаем всё заново
+      "
+  only:
+    - firstStage  # Деплоим только из main
