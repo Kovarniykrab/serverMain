@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+
 	"github.com/lib/pq"
 	"gitlab.com/kovarniykrab/servermain/internel/domain"
 )
@@ -30,6 +31,7 @@ func (db *Service) UsersSearch(ctx context.Context, form domain.UserSearchForm) 
 		q.Where("user_name = ?", form.UserName)
 	}
 
+	db.log.Debug("search user", "", q.String())
 	cnt, err := q.Offset((form.Page - 1) * form.Limit).
 		Limit(form.Limit).ScanAndCount(ctx)
 
@@ -63,10 +65,11 @@ func (db *Service) UpdateUser(ctx context.Context, user domain.User) (domain.Use
 
 func (db *Service) DeleteUser(ctx context.Context, id int) error {
 
-	if _, err := db.db.NewDelete().Model(&domain.User{ID: id}).
-		WherePK().Exec(ctx); err != nil {
+	a, err := db.db.NewDelete().Model(&domain.User{ID: id}).
+		WherePK().Exec(ctx)
+	if err != nil {
 		return err
 	}
-
+	db.log.Debug("Delete", "deteled user", a)
 	return nil
 }

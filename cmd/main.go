@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"embed"
-	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"runtime"
@@ -12,9 +13,10 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/jessevdk/go-flags"
-	"github.com/joho/godotenv"
+	"github.com/pressly/goose/v3"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/rs/zerolog"
+	"github.com/uptrace/bun/driver/pgdriver"
+	embedServer "gitlab.com/kovarniykrab/servermain"
 	"gitlab.com/kovarniykrab/servermain/config"
 	routers "gitlab.com/kovarniykrab/servermain/internel/api/router"
 	"gitlab.com/kovarniykrab/servermain/internel/database"
@@ -39,14 +41,14 @@ func main() {
 		}
 
 		if err := srv.ListenAndServe(); err != nil {
-			log.Err(err).Msg("metrics")
+			log.Error("metrics server error", "error", err)
 		}
 	}()
 
 	go func() {
 		if cnf.Web.SSLSertPath != "" && cnf.Web.SSLKeyPath != "" {
 			if err := srv.ListenAndServeTLS(cnf.Web.SSLSertPath, cnf.Web.SSLKeyPath); err != nil {
-				log.Err(err).Msg("start wrong")
+				log.Error("server start error", "error", err)
 
 				panic(err)
 			}
@@ -55,15 +57,14 @@ func main() {
 		}
 
 		if err := srv.ListenAndServe(); err != nil {
-			log.Err(err).Msg("start wrong")
-
+			log.Error("server start error", "error", err)
 			panic(err)
 		}
 	}()
 
-	log.Warn().Str("host", app.Config.Web.Host).
-		Int("port", app.Config.Web.Port).
-		Msg("internel start")
+	log.Warn("internal server started",
+		"host", app.Config.Web.Host,
+		"port", app.Config.Web.Port)
 
 	c := make(chan os.Signal, 1)
 
@@ -77,47 +78,55 @@ func main() {
 		panic(err)
 	}
 
-	log.Info().Msg("service stop")
+	log.Info("server stopped")
 
 	cancel()
 
 	runtime.Goexit()
 }
 
-func initLogger(conf config.Config) zerolog.Logger {
-	log := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger()
+func InitLogger(l string) *slog.Logger {
 
-	log.WithLevel(conf.LogLevel)
-
-	return log
-}
-
-func initServer(ctx context.Context) (config.Config, *http.Server, *routers.App, *zerolog.Logger) {
-
-	err := godotenv.Load("../.env")
-	if err != nil {
-		fmt.Printf("Warning: .env file not found or couldn't be loaded: %v\n", err)
+	var level slog.Level
+	if err := level.UnmarshalText([]byte(l)); err != nil {
+		slog.Error("invalid log level in config, using default",
+			"error", err, "configured_level", l)
+		level = slog.LevelDebug
 	}
 
+	return slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: level,
+	}))
+} //заменить пакет логирования на slogLogger, залогировать весь код с его помощью где только возможно
+//научиться дебажить в вскоде
+// подтянуть конфигуранионные файлы ".env"
+// развернуть приложение на сервер, ci/cd, docker
+//сваггер
+
+func initServer(ctx context.Context) (config.Config, *http.Server, *routers.App, *slog.Logger) {
 	conf := config.Config{}
 	parser := flags.NewParser(&conf, flags.Default)
 	if _, err := parser.Parse(); err != nil {
-		fmt.Printf("error parse env: %s\n", err.Error())
-		os.Exit(1)
+		panic(err)
 	}
-	log := initLogger(conf)
 
-	repo, _, e := database.New(conf, &log)
+	log := InitLogger(conf.LogLevel)
+
+	log.Debug("configuration initialized", "config", conf)
+
+	repo, e := database.New(conf, log)
 	if e != nil {
+		log.Error("failed to initialize database", "error", e)
 		panic(e)
 	}
 
-	app, err := routers.New(ctx, &conf, &log, repo)
+	app, err := routers.New(ctx, &conf, log, repo)
 	if err != nil {
-		panic(e)
+		log.Error("failed to initiazile routers", "error", err)
+		panic(err)
 	}
 
-	//migrate(db)
+	migrate(conf)
 
 	srv := &http.Server{
 		Handler:           app.GetRouter(),
@@ -128,21 +137,43 @@ func initServer(ctx context.Context) (config.Config, *http.Server, *routers.App,
 		ReadHeaderTimeout: time.Second * time.Duration(app.Config.Web.ReadTimeout),
 	}
 
-	return conf, srv, app, &log
+	return conf, srv, app, log
 }
 
 var embedMigrations embed.FS
 
-//func migrate(db *sqlx.DB) {
-//	s := embedMigrations
-//
-//	goose.SetBaseFS(s)
-//
-//	if err := goose.SetDialect("postgres"); err != nil {
-//		panic(err)
-//	}
-//
-//	if err := goose.Up(db.DB, "resources/store/psql/migrations"); err != nil {
-//		panic(err)
-//	}
-//}
+func migrate(cfg config.Config) {
+	goose.SetBaseFS(embedServer.EmbedMigrations)
+
+	if err := goose.SetDialect("postgres"); err != nil {
+		panic(err)
+	}
+
+	db := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(cfg.PSQL.DSN)))
+
+	if err := goose.Up(db, "resources/store/psql/migrations"); err != nil {
+		panic(err)
+	}
+}
+
+// @title           Swagger report API
+// @version         1.0
+// @description     mayak api server.
+// @termsOfService  http://mayakmetall.ru
+
+// @contact.name   API Support
+// @contact.url    http://mayakmetall.ru
+// @contact.email  cadyrov@gmmail.com
+
+// @license.name  Apache 2.0
+// @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
+
+// @host      0.0.0.0:8080
+// @BasePath  /api
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+
+// @externalDocs.description  OpenAPI
+// @externalDocs.url          https://swagger.io/resources/open-api/

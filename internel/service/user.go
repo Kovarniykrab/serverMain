@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"database/sql"
+	"fmt"
+
 	"gitlab.com/kovarniykrab/servermain/internel/domain"
 )
 
@@ -51,4 +53,21 @@ func (app *App) UpdateUser(ctx context.Context, id int, userForm domain.UserForm
 	}
 
 	return u, nil
+}
+
+func (app *App) DeleteUser(ctx context.Context, id int, userForm domain.UserForm) (domain.User, error) {
+
+	_, err := app.Database.GetUserByID(ctx, id)
+	if err != nil {
+		if err != sql.ErrNoRows {
+			return domain.User{}, fmt.Errorf("user with id %d not found", id)
+		}
+		return domain.User{}, fmt.Errorf("failed to check user existence: %w", err)
+	}
+
+	err = app.Database.DeleteUser(ctx, id)
+	if err != nil {
+		return domain.User{}, fmt.Errorf("failed to delete user: %v", err)
+	}
+	return domain.User{}, err
 }

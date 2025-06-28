@@ -2,8 +2,9 @@ package router
 
 import (
 	"context"
+	"log/slog"
+
 	"github.com/gorilla/mux"
-	"github.com/rs/zerolog"
 	"gitlab.com/kovarniykrab/servermain/config"
 	"gitlab.com/kovarniykrab/servermain/internel/service"
 
@@ -13,11 +14,11 @@ import (
 type App struct {
 	handlers.App
 	Config  *config.Config
-	logger  *zerolog.Logger
+	logger  *slog.Logger
 	Service *service.App
 }
 
-func New(ctx context.Context, cfg *config.Config, logger *zerolog.Logger, repo service.Database) (*App, error) {
+func New(ctx context.Context, cfg *config.Config, logger *slog.Logger, repo service.Database) (*App, error) {
 
 	srv := service.New(ctx, cfg, logger, repo)
 	hand := handlers.New(ctx, cfg, srv, logger)

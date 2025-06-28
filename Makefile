@@ -1,5 +1,5 @@
 build:
-	go build -o ./bin/http ./main.go
+	go build -o ./bin/http ./cmd/main.go
 
 swagger:
 	swag init --parseDependency
@@ -13,3 +13,5 @@ migrate-down:
 	GOOSE_DRIVER=postgres goose -dir=./resources/store/psql/migrations down
 migrate-create:
 	GOOSE_DRIVER=postgres goose -dir=./resources/store/psql/migrations create new psql
+run-local:
+    export $$(cat .env | xargs) && \

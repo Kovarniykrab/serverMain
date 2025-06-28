@@ -2,7 +2,9 @@ package service
 
 import (
 	"context"
-	"github.com/rs/zerolog"
+
+	"log/slog"
+
 	"gitlab.com/kovarniykrab/servermain/config"
 	"gitlab.com/kovarniykrab/servermain/internel/domain"
 )
@@ -10,7 +12,7 @@ import (
 type App struct {
 	Database Database
 	cfg      *config.Config
-	logger   *zerolog.Logger
+	logger   *slog.Logger
 	ctx      context.Context
 	db       *Database
 }
@@ -22,7 +24,7 @@ type Database interface {
 	DeleteUser(ctx context.Context, id int) error
 }
 
-func New(ctx context.Context, cfg *config.Config, logger *zerolog.Logger, Database Database) *App {
+func New(ctx context.Context, cfg *config.Config, logger *slog.Logger, Database Database) *App {
 
 	return &App{
 		cfg:      cfg,
