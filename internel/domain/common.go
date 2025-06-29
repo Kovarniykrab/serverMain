@@ -1,9 +1,10 @@
 package domain
 
 import (
+	"net/http"
+
 	"github.com/cadyrov/godict/v2"
 	"github.com/cadyrov/goerr/v2"
-	"net/http"
 )
 
 type SearchForm struct {

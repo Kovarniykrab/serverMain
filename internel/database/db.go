@@ -5,10 +5,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/cadyrov/goerr/v2"
 	"github.com/jmoiron/sqlx"
-	"github.com/rs/zerolog"
 	"github.com/uptrace/bun"
 	"github.com/uptrace/bun/dialect/pgdialect"
 	"github.com/uptrace/bun/driver/pgdriver"
@@ -18,12 +18,12 @@ import (
 var ErrNotFound = errors.New("not found")
 
 type Service struct {
-	log    *zerolog.Logger
+	log    *slog.Logger
 	sqlxDB *sqlx.DB
 	db     *bun.DB
 }
 
-func New(config config.Config, log *zerolog.Logger) (*Service, goerr.IError) {
+func New(config config.Config, log *slog.Logger) (*Service, goerr.IError) {
 	r := Service{
 		log: log,
 	}
@@ -35,6 +35,7 @@ func New(config config.Config, log *zerolog.Logger) (*Service, goerr.IError) {
 	return &r, nil
 }
 
+//nolint:goerr113
 func (db *Service) BeginSQLX(ctx context.Context, opts *sql.TxOptions) (*sqlx.Tx, goerr.IError) {
 	tx, e := db.sqlxDB.BeginTxx(ctx, opts)
 	if e != nil {
@@ -47,16 +48,8 @@ func (db *Service) BeginSQLX(ctx context.Context, opts *sql.TxOptions) (*sqlx.Tx
 func (db *Service) TX(ctx context.Context) (bun.Tx, error) {
 	tx, err := db.db.BeginTx(ctx, &sql.TxOptions{})
 	if err != nil {
-		return bun.Tx{}, errors.New(fmt.Sprintf("err tx %s", err))
+		return bun.Tx{}, fmt.Errorf("some error: %v", err)
 	}
 
 	return tx, nil
-}
-
-func (db *Service) Ping(ctx context.Context) error {
-	if err := db.db.PingContext(ctx); err != nil {
-		return errors.New(fmt.Sprintf("err tx %s", err))
-	}
-
-	return nil
 }

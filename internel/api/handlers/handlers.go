@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"encoding/json"
-	"github.com/gorilla/mux"
-	"gitlab.com/kovarniykrab/servermain/internel/domain"
 	"net/http"
 	"strconv"
+
+	"github.com/gorilla/mux"
+	"gitlab.com/kovarniykrab/servermain/internel/domain"
 )
 
 func SearchUser(app *App) http.HandlerFunc {
@@ -40,6 +41,7 @@ func GetUser(app *App) http.HandlerFunc {
 		user, err := app.service.GetUser(req.Context(), id)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
+			return
 		}
 
 		w.Header().Set("Content-type", "application/json")
@@ -95,23 +97,28 @@ func UpdateUser(app *App) http.HandlerFunc {
 	}
 }
 
-//
-//func DeleteUser(app *App) http.HandlerFunc {
-//	return func(w http.ResponseWriter, req *http.Request) {
-//		vars := mux.Vars(req)
-//		id, err := strconv.Atoi(vars["id"])
-//		if err != nil {
-//			http.Error(w, "Invalid ID", http.StatusBadRequest)
-//			return
-//		}
-//
-//		err = app.service.(id)
-//		if err != nil {
-//			http.Error(w, err.Error(), http.StatusBadRequest)
-//			return
-//		}
-//
-//		w.WriteHeader(http.StatusNoContent)
-//	}
-//
-//}
+func DeleteUser(app *App) http.HandlerFunc {
+	return func(w http.ResponseWriter, req *http.Request) {
+		vars := mux.Vars(req)
+		id, err := strconv.Atoi(vars["id"])
+		if err != nil {
+			http.Error(w, "Invalid ID", http.StatusBadRequest)
+			return
+		}
+
+		var userForm domain.UserForm
+		if err := json.NewDecoder(req.Body).Decode(&userForm); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		_, err = app.service.DeleteUser(req.Context(), id, userForm)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	}
+
+}
