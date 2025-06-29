@@ -1,9 +1,10 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"gitlab.com/kovarniykrab/servermain/internel/api/handlers"
-	"net/http"
 )
 
 func (app *App) SetupUserRoutes(router *mux.Router) {
