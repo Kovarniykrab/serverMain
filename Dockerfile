@@ -7,7 +7,6 @@ RUN apk add make
 ENV GO111MODULE=on
 RUN go mod tidy
 RUN make build
-
 FROM scratch
 
 COPY --from=builder /servermain/bin /servermain/bin
