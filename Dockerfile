@@ -17,4 +17,4 @@ EXPOSE 7000
 COPY --from=builder /serverMain/bin/http /serverMain/bin/http
 COPY --from=builder /serverMain /serverMain/
 WORKDIR /serverMain/
-ENTRYPOINT ["bin/http"]
+ENTRYPOINT ["/serverMain/http"]
