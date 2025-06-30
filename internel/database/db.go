@@ -29,6 +29,7 @@ func New(config config.Config, log *slog.Logger) (*Service, goerr.IError) {
 	}
 
 	//new bun
+
 	sqlDB := sql.OpenDB(pgdriver.NewConnector(pgdriver.WithDSN(config.PSQL.DSN)))
 	r.db = bun.NewDB(sqlDB, pgdialect.New())
 

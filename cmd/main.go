@@ -127,7 +127,7 @@ func initServer(ctx context.Context) (config.Config, *http.Server, *router.App, 
 		panic(err)
 	}
 
-	//migrate(conf)
+	migrate(conf)
 
 	srv := &http.Server{
 		Handler:           app.GetRouter(),
