@@ -15,8 +15,8 @@ type JWT struct {
 	HourExpired int    `long:"jwt-hour-expired" env:"SERVER_JWT_HOUR_EXPIRED"`
 }
 type Web struct {
-	Host         string     `long:"web-host" env:"SERVER_WEB_HOST" default:"localhost"`
-	Port         int        `long:"web-port" env:"SERVER_WEB_PORT" default:"8080"`
+	Host         string     `long:"web-host" env:"SERVER_WEB_HOST"`
+	Port         int        `long:"web-port" env:"SERVER_WEB_PORT"`
 	ReadTimeout  int        `long:"web-read-timeout" env:"SERVER_WEB_READ_TIMEOUT"`
 	WriteTimeout int        `long:"web-write-timeout" env:"SERVER_WEB_WRITE_TIMEOUT"`
 	IdleTimeout  int        `long:"web-idle-timeout" env:"SERVER_WEB_IDLE_TIMEOUT"`

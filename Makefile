@@ -1,6 +1,6 @@
 build:
-	go build -o ./bin/http ./cmd/main.go
-
+	rm ./bin/srv; \
+	go build -o ./bin/srv ./cmd/main.go
 swagger:
 	swag init --parseDependency
 
