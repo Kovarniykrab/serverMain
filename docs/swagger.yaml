@@ -110,10 +110,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: |-
-        верификация входных данных, проверка что приходит(телефон или email), проверка если такие данные в бд,
-        и если есть такой телефон то, отправка смс. А если нет телефона или email, то возвращает ошибку.
-        а если есть такой email, то возвращает данные такого пользователя.
+      description: получить пользователя
       parameters:
       - description: JSON
         in: body
@@ -144,16 +141,13 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handlers.Error'
-      summary: верификация входных данных.
+      summary: получить пользователя
       tags:
       - USER
     put:
       consumes:
       - application/json
-      description: |-
-        верификация входных данных, проверка что приходит(телефон или email), проверка если такие данные в бд,
-        и если есть такой телефон то, отправка смс. А если нет телефона или email, то возвращает ошибку.
-        а если есть такой email, то возвращает данные такого пользователя.
+      description: обновить польхователя
       parameters:
       - description: JSON
         in: body
@@ -184,7 +178,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/handlers.Error'
-      summary: верификация входных данных.
+      summary: обновить пользователя
       tags:
       - USER
   /create:

@@ -43,10 +43,8 @@ func SearchUser(app *App) http.HandlerFunc {
 }
 
 // GetUser godoc
-// @Summary     верификация входных данных.
-// @Description верификация входных данных, проверка что приходит(телефон или email), проверка если такие данные в бд,
-// @Description и если есть такой телефон то, отправка смс. А если нет телефона или email, то возвращает ошибку.
-// @Description а если есть такой email, то возвращает данные такого пользователя.
+// @Summary     получить пользователя
+// @Description получить пользователя
 // @Tags         USER
 // @Accept       json
 // @Produce      json
@@ -112,10 +110,8 @@ func CreateUser(app *App) http.HandlerFunc {
 }
 
 // UpdateUser godoc
-// @Summary     верификация входных данных.
-// @Description верификация входных данных, проверка что приходит(телефон или email), проверка если такие данные в бд,
-// @Description и если есть такой телефон то, отправка смс. А если нет телефона или email, то возвращает ошибку.
-// @Description а если есть такой email, то возвращает данные такого пользователя.
+// @Summary     обновить пользователя
+// @Description обновить польхователя
 // @Tags         USER
 // @Accept       json
 // @Produce      json
