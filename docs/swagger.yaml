@@ -1,0 +1,233 @@
+basePath: /api
+definitions:
+  domain.UserForm:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      user_name:
+        type: string
+    type: object
+  handlers.Error:
+    properties:
+      error:
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: 0.0.0.0:8080
+info:
+  contact:
+    email: Zaratos1999@gmmail.com
+    name: API Support
+    url: http://kovarniykrab.duckdns.org
+  description: serverMain api server.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  termsOfService: http://kovarniykrab.duckdns.org
+  title: Swagger report API
+  version: "1.0"
+paths:
+  /:
+    post:
+      consumes:
+      - application/json
+      description: поиск всех польхователей
+      parameters:
+      - description: JSON
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserForm'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Error'
+      summary: поиск пользователя
+      tags:
+      - USER
+  /{id}:
+    delete:
+      consumes:
+      - application/json
+      description: удаление пользователя по id
+      parameters:
+      - description: JSON
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserForm'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Error'
+      summary: Удаление пользователя
+      tags:
+      - USER
+    get:
+      consumes:
+      - application/json
+      description: |-
+        верификация входных данных, проверка что приходит(телефон или email), проверка если такие данные в бд,
+        и если есть такой телефон то, отправка смс. А если нет телефона или email, то возвращает ошибку.
+        а если есть такой email, то возвращает данные такого пользователя.
+      parameters:
+      - description: JSON
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserForm'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Error'
+      summary: верификация входных данных.
+      tags:
+      - USER
+    put:
+      consumes:
+      - application/json
+      description: |-
+        верификация входных данных, проверка что приходит(телефон или email), проверка если такие данные в бд,
+        и если есть такой телефон то, отправка смс. А если нет телефона или email, то возвращает ошибку.
+        а если есть такой email, то возвращает данные такого пользователя.
+      parameters:
+      - description: JSON
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserForm'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Error'
+      summary: верификация входных данных.
+      tags:
+      - USER
+  /create:
+    post:
+      consumes:
+      - application/json
+      description: создание пользователя
+      parameters:
+      - description: JSON
+        in: body
+        name: object
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserForm'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/domain.UserForm'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/handlers.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/handlers.Error'
+      summary: создание пользователя
+      tags:
+      - USER
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

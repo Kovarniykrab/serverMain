@@ -2,7 +2,7 @@ build:
 	rm ./bin/srv; \
 	go build -o ./bin/srv ./cmd/main.go
 swagger:
-	swag init --parseDependency
+	swag init --parseDependency -g cmd/main.go
 
 lint:
 	gofmt -s -w ./ && golangci-lint run

@@ -159,12 +159,12 @@ func migrate(cfg config.Config) {
 
 // @title           Swagger report API
 // @version         1.0
-// @description     mayak api server.
-// @termsOfService  http://mayakmetall.ru
+// @description     serverMain api server.
+// @termsOfService  http://kovarniykrab.duckdns.org
 
 // @contact.name   API Support
-// @contact.url    http://mayakmetall.ru
-// @contact.email  cadyrov@gmmail.com
+// @contact.url     http://kovarniykrab.duckdns.org
+// @contact.email  Zaratos1999@gmmail.com
 
 // @license.name  Apache 2.0
 // @license.url   http://www.apache.org/licenses/LICENSE-2.0.html
