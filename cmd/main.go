@@ -22,6 +22,13 @@ import (
 	"gitlab.com/kovarniykrab/servermain/internel/database"
 )
 
+
+// @title тестовый API
+// @version 0.5
+// @description сырой API
+// @host kovarniykrab.duckdns.org
+// @BasePath /cmd
+
 func main() {
 	ctx := context.Background()
 
