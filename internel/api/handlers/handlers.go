@@ -21,7 +21,7 @@ import (
 // @Failure      404  {object}  Error
 // @Failure      409  {object}  Error
 // @Failure      500  {object}  Error
-// @Router      / [POST].
+// @Router      /api/user/ [POST].
 func SearchUser(app *App) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		user := domain.UserSearchForm{}
@@ -54,7 +54,7 @@ func SearchUser(app *App) http.HandlerFunc {
 // @Failure      404  {object}  Error
 // @Failure      409  {object}  Error
 // @Failure      500  {object}  Error
-// @Router      /{id} [GET].
+// @Router      /api/user/{id} [GET].
 func GetUser(app *App) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		vars := mux.Vars(req)
@@ -87,7 +87,7 @@ func GetUser(app *App) http.HandlerFunc {
 // @Failure      404  {object}  Error
 // @Failure      409  {object}  Error
 // @Failure      500  {object}  Error
-// @Router      /create [POST].
+// @Router      api/user/create [POST].
 func CreateUser(app *App) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		var user domain.User
@@ -121,7 +121,7 @@ func CreateUser(app *App) http.HandlerFunc {
 // @Failure      404  {object}  Error
 // @Failure      409  {object}  Error
 // @Failure      500  {object}  Error
-// @Router      /{id} [PUT].
+// @Router      api/user/{id} [PUT].
 func UpdateUser(app *App) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		vars := mux.Vars(req)
@@ -161,7 +161,7 @@ func UpdateUser(app *App) http.HandlerFunc {
 // @Failure      404  {object}  Error
 // @Failure      409  {object}  Error
 // @Failure      500  {object}  Error
-// @Router      /{id} [DELETE].
+// @Router      api/user/{id} [DELETE].
 func DeleteUser(app *App) http.HandlerFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		vars := mux.Vars(req)
