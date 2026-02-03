@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"embed"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"os"
@@ -19,9 +20,7 @@ import (
 	embedServer "gitlab.com/kovarniykrab/servermain"
 	"gitlab.com/kovarniykrab/servermain/config"
 	"gitlab.com/kovarniykrab/servermain/internel/api/router"
-	"gitlab.com/kovarniykrab/servermain/internel/database"
 )
-
 
 // @title тестовый API
 // @version 0.5
@@ -31,8 +30,9 @@ import (
 
 func main() {
 	ctx := context.Background()
-
+	fmt.Println(1)
 	cnf, srv, app, log := initServer(ctx)
+	fmt.Println(2)
 
 	go func() {
 		rt := mux.NewRouter()
@@ -117,18 +117,13 @@ func initServer(ctx context.Context) (config.Config, *http.Server, *router.App, 
 	if _, err := parser.Parse(); err != nil {
 		panic(err)
 	}
-
+	fmt.Println(conf)
 	log := initLogger(&conf.LogLevel)
+	fmt.Println(3)
 
 	log.Debug("configuration initialized", "config", conf)
 
-	repo, e := database.New(conf, log)
-	if e != nil {
-		log.Error("failed to initialize database", "error", e)
-		panic(e)
-	}
-
-	app, err := router.New(ctx, &conf, log, repo)
+	app, err := router.New(ctx, &conf, log)
 	if err != nil {
 		log.Error("failed to initiazile routers", "error", err)
 		panic(err)

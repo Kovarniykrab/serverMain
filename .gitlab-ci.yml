@@ -1,19 +1,19 @@
-image: docker:git
+  image: docker:git
 
-services:
-  - docker:dind
+  services:
+    - docker:dind
 
-stages:
-  - build
-  - deploy
+  stages:
+    - build
+    - deploy
 
-build:
-  stage: build
-  script:
-    - docker info
-    - echo "${{ secrets.GITHUB_TOKEN }}" | docker login --username github-ci-token --password-stdin ${{ env.REGISTRY }}
-    - docker build ./ --tag ${{ github.repository }}:${{ github.repository }}
-    - docker push ${{ github.repository }}:latest
-  only:
-    - main
+  build:
+    stage: build
+    script:
+      - docker info
+      - echo "${{ secrets.GITHUB_TOKEN }}" | docker login -ghcr.io -u ${{ github.actor }} --password-stdin ${{ env.REGISTRY }}
+      - docker build ./ --tag ghcr.io/${{ github.repository }}:latest
+      - docker push ${{ github.repository }}:latest
+    only:
+      - main
 

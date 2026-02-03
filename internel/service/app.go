@@ -33,3 +33,5 @@ func New(ctx context.Context, cfg *config.Config, logger *slog.Logger, Database 
 		ctx:      ctx,
 	}
 }
+
+// косяки с гитлабом
